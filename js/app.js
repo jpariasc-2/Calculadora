@@ -39,6 +39,8 @@ var Calculadora = {
     switch (tecla) {
       case "on":
         display.innerHTML = "0";
+        this.a = 0.0;
+        this.b = 0.0;
         break;
 
       case "sign":
@@ -82,14 +84,81 @@ var Calculadora = {
         this.digitarNumero("9");
         break;
       case "punto":
-          if (!display.innerHTML.includes(".") && display.innerHTML.length<8){
-            display.append(".");
-          }
+        if (!display.innerHTML.includes(".") && display.innerHTML.length<8){
+          display.append(".");
+        }
+        break;
+      case "mas":
+        this.ejecutandoOp("suma");
+        break;
+      case "menos":
+        this.ejecutandoOp("resta");
+        break;
+      case "por":
+        this.ejecutandoOp("multiplicacion");
+        break;
+      case "dividido":
+        this.ejecutandoOp("division");
+        break;
+      case "igual":
+        if (this.enop == true && display.innerHTML != "") {
+          this.b = Number(display.innerHTML);
+          this.ejecutarOperacion(this.a, this.b, this.operacion);
+          this.enop = false;
+          this.encadenar = true;
+        } else if (this.encadenar) {
+          this.ejecutarOperacion(Number(display.innerHTML), this.b, this.operacion);
+        }
         break;
       default:
+      console.log("tecla no valida");
     }
-  }
+  },
 
+ejecutandoOp: function (op){
+  if (this.enop == false ) {
+    this.a = Number(display.innerHTML);
+    this.enop = true;
+    this.operacion = op;
+    display.innerHTML = "";
+    this.encadenar = false;
+  }
+},
+
+ejecutarOperacion: function (operando1, operando2, operador){
+  switch (operador) {
+    case "suma":
+      display.innerHTML = this.controlarDigitosResultado(operando1 + operando2);
+      break;
+    case "resta":
+      display.innerHTML = this.controlarDigitosResultado(operando1 - operando2);
+      break;
+    case "multiplicacion":
+      display.innerHTML = this.controlarDigitosResultado(operando1 * operando2);
+      break;
+    case "division":
+      display.innerHTML = this.controlarDigitosResultado(operando1 / operando2);
+      break;
+    default:
+      console.log("operacion no valida");
+  }
+},
+
+controlarDigitosResultado: function(numero){
+  if (numero.toString().length>8){
+    return numero.toPrecision(5);
+  } else {
+    return numero;
+  }
+},
+
+//variables para operaciones
+a : 0.0,
+b : 0.0,
+//indicador en operacion
+enop : false,
+encadenar: false,
+operacion : ""
 //fin del módulo
 };
 
