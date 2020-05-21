@@ -26,11 +26,17 @@ var Calculadora = {
     var longitud = display.innerHTML.length;
     if (display.innerHTML.includes("-")) { longitud--;}
     if (display.innerHTML.includes(".")) { longitud--;}
-    if (longitud < 8) {
-      if (display.innerHTML == "0") {
-        display.innerHTML = tecla;
-      } else {
-        display.append(tecla);
+
+    if (this.resultadoEnPant){
+      display.innerHTML = tecla;
+      this.resultadoEnPant = false;
+    } else {
+      if (longitud < 8) {
+        if (display.innerHTML == "0") {
+          display.innerHTML = tecla;
+        } else {
+          display.append(tecla);
+        }
       }
     }
   },
@@ -38,14 +44,23 @@ var Calculadora = {
   actualizarDisplay: function (tecla){
     switch (tecla) {
       case "on":
-        display.innerHTML = "0";
-        this.a = 0.0;
-        this.b = 0.0;
+        if (this.enop) {
+          display.innerHTML = "0";
+          this.b = 0.0;
+        } else {
+          display.innerHTML = "0";
+          this.b = 0.0;
+          this.a = 0.0;
+          this.operacion = "";
+          this.enop = false;
+          this.encadenar = false;
+          this.resultadoEnPant = false;
+        }
         break;
 
       case "sign":
         if (display.innerHTML != "0") {
-          if (display.innerHTML.includes("-")){
+          if (display.innerHTML.indexOf("-") == 0){
             display.innerHTML = display.innerHTML.substr(1);
           }else {
             display.innerHTML = "-" + display.innerHTML;
@@ -84,9 +99,11 @@ var Calculadora = {
         this.digitarNumero("9");
         break;
       case "punto":
-        if (!display.innerHTML.includes(".") && display.innerHTML.length<8){
-          display.append(".");
-        }
+      if (display.innerHTML == "") {
+        display.append("0.");
+      } else if (!display.innerHTML.includes(".") && display.innerHTML.length<8) {
+        display.append(".");
+      }
         break;
       case "mas":
         this.ejecutandoOp("suma");
@@ -106,8 +123,10 @@ var Calculadora = {
           this.ejecutarOperacion(this.a, this.b, this.operacion);
           this.enop = false;
           this.encadenar = true;
+          this.resultadoEnPant = true;
         } else if (this.encadenar) {
           this.ejecutarOperacion(Number(display.innerHTML), this.b, this.operacion);
+          this.resultadoEnPant = true;
         }
         break;
       default:
@@ -122,6 +141,7 @@ ejecutandoOp: function (op){
     this.operacion = op;
     display.innerHTML = "";
     this.encadenar = false;
+    this.resultadoEnPant = false;
   }
 },
 
@@ -137,7 +157,7 @@ ejecutarOperacion: function (operando1, operando2, operador){
       display.innerHTML = this.controlarDigitosResultado(operando1 * operando2);
       break;
     case "division":
-      display.innerHTML = this.controlarDigitosResultado(operando1 / operando2);
+      display.innerHTML = this.controlarDigitosResultado((operando1 / operando2));
       break;
     default:
       console.log("operacion no valida");
@@ -145,20 +165,25 @@ ejecutarOperacion: function (operando1, operando2, operador){
 },
 
 controlarDigitosResultado: function(numero){
-  if (numero.toString().length>8){
-    return numero.toPrecision(5);
+  var longitudMax = 8;
+  if (numero.toString().includes("-")) { longitudMax++;}
+  if (numero.toString().includes(".")) { longitudMax++;}
+  if ( numero.toString().length > longitudMax){
+      return numero.toString().substr(0,longitudMax);
   } else {
     return numero;
   }
+  //revisar metodo toPrecision()--sirve pero daña formato grafico, usar notación exp.
 },
 
 //variables para operaciones
 a : 0.0,
 b : 0.0,
-//indicador en operacion
+//indicadores de estodo para operaciones
 enop : false,
 encadenar: false,
-operacion : ""
+operacion : "",
+resultadoEnPant: false
 //fin del módulo
 };
 
